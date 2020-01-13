@@ -1,8 +1,15 @@
-const express = require("express");
-const bodyParser = require('body-parser');
-const compress = require('compression');
-const cors = require('cors');
-const routes = require('./api/routes');
+import cors from "cors";
+import bodyParser from 'body-parser';
+import express from "express";
+import compress from "compression";
+import routes from "./api/routes";
+
+
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+mongoose.connect('mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DB,
+    {useNewUrlParser: true, useUnifiedTopology: true});
 
 const app = express();
 
