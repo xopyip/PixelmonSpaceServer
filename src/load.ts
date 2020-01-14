@@ -23,6 +23,16 @@ function load(fileName: string){
             let j = JSON.parse(data.toString().replace(": 00", ": 0"));
             j.id = entry.name.substr(entry.name.lastIndexOf("/") + 1).substr(0, 3);
             let poke = new PokemonModel(j);
+            for(let i = 0; i<poke.evolutions.length; i++){
+                let to = j.evolutions[i].to;
+                if(typeof to === 'object'){
+                    poke.evolutions[i].name = to.name;
+                    poke.evolutions[i].form = to.form;
+                }else{
+                    poke.evolutions[i].name = to;
+                    poke.evolutions[i].form = 0;
+                }
+            }
             poke.save().then(() => {
                 console.log(poke.pixelmonName + " saved");
             });
