@@ -5,7 +5,7 @@ const router = express.Router();
 
 
 router.get('/', (req: Request, res: Response) => res.send('PixelmonWiki'));
-router.get('/pokmeon', PokemonController.list);
+router.get('/pokemon', PokemonController.list);
 router.get('/pokemon/:id(\\d+)', PokemonController.getByID);
 router.get('/pokemon/:name', PokemonController.getByName);
 
