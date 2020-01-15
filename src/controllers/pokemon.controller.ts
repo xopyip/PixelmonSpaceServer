@@ -4,7 +4,7 @@ import {PokemonModel} from "../models/pokemon/pokemon";
 class PokemonController{
     public static async list(req: Request, res: Response){
         let find = PokemonModel.find({});
-        find.select("-_id id pixelmonName");
+        find.select("-_id id pixelmonName stats types");
         find.sort("id");
         res.json(await find.exec());
     }
