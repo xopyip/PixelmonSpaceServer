@@ -1,5 +1,7 @@
 import {StreamZip} from "@drorgl/node-stream-zip";
 import {PokemonModel} from "./models/pokemon/pokemon";
+import fs from "fs";
+import fse from "fs-extra";
 
 function load(fileName: string){
     const zip = new StreamZip({
@@ -10,6 +12,10 @@ function load(fileName: string){
         console.log(err);
     });
     zip.on('ready', async () => {
+        fse.removeSync('storage');
+        fs.mkdirSync('storage');
+        fs.mkdirSync('storage/sprites');
+
         await PokemonModel.find((err, res) => {
             console.log(`Removing ${res.length} pokemons`);
         });
@@ -37,6 +43,13 @@ function load(fileName: string){
                 console.log(poke.pixelmonName + " saved");
             });
         }
+        await new Promise((resolve, reject) => {
+            zip.extract('assets/pixelmon/textures/sprites/pokemon/', './storage/sprites', err => {
+                console.log(err ? 'Extract sprites error' : 'Sprites extracted');
+                resolve();
+            })
+        });
+        console.log('Done!');
         zip.close();
     });
 }
