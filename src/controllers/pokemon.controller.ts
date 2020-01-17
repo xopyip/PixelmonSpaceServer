@@ -20,8 +20,9 @@ class PokemonController {
         res.json((await find.exec())[0] || {error: "Not found"});
     }
 
-    private static findFile(start: String, ends: String[]): string | undefined {
-        for (let end in ends) {
+    private static findFile(start: string, ends: string[]): string | undefined {
+        for (let i = 0; i < ends.length; i++) {
+            let end = ends[i];
             if (fs.existsSync(start + end)) {
                 return end;
             }
@@ -44,7 +45,7 @@ class PokemonController {
                 });
             });
             files.forEach(file => {
-                if (fName != null && file.startsWith(`${req.params.id}`.padStart(3, "0"))) {
+                if (fName == undefined && file.startsWith(`${req.params.id}`.padStart(3, "0"))) {
                     fName = file;
                 }
             })
