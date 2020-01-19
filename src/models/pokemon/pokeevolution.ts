@@ -7,7 +7,9 @@ interface IPokeEvolution extends mongoose.Document {
     conditions: Map<String, any>[],
     moves: String[],
     evoType: String,
-    from: String
+    from: String,
+    fromID: Number,
+    toID: Number
 }
 
 const PokeEvolutionScheme = new mongoose.Schema({
@@ -17,7 +19,9 @@ const PokeEvolutionScheme = new mongoose.Schema({
     conditions: [Map],
     moves: [String],
     evoType: String,
-    from: String
+    from: String,
+    fromID: Number,
+    toID: Number
 });
 const PokeEvolutionModel = mongoose.model<IPokeEvolution>('PokeEvolution', PokeEvolutionScheme);
 

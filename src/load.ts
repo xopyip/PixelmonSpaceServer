@@ -55,9 +55,19 @@ function load(fileName: string){
                 if (findPrevEvoPokemon == null) return;
                 if (findPrevEvoPokemon.evolutions.length > 0) {
                     prev.push(Object.assign(findPrevEvoPokemon.evolutions[0], {
-                        from: evo
+                        from: evo,
+                        toID: pokemons.find(p => p.pixelmonName == findPrevEvoPokemon?.evolutions[0].name)?.id,
+                        fromID: findPrevEvoPokemon.id
                     }));
                 }
+            });
+            let evo: IPokeEvolution[] = pokemon.evolutions;
+            evo.forEach(evo => {
+                evo.fromID = pokemon.id;
+                let find = pokemons.find((p) => p.pixelmonName == evo.name);
+                if (find == null) return;
+                evo.toID = find.id;
+                evo.from = pokemon.pixelmonName;
             });
             let foundNames: String[] = [];
             pokemon.evolutions.forEach((evo) => {
@@ -69,13 +79,16 @@ function load(fileName: string){
                 if (find == null) return;
                 if (find.evolutions.length > 0) {
                     next.push(Object.assign(find.evolutions[0], {
-                        from: evo.name
+                        from: evo.name,
+                        toID: pokemons.find(p => p.pixelmonName == find?.evolutions[0].name)?.id,
+                        fromID: evo.toID
                     }));
                 }
             });
             await PokemonModel.update({_id: pokemon._id}, {
                 prevEvolutions: prev,
-                nextEvolutions: next
+                nextEvolutions: next,
+                evolutions: evo
             });
             console.log(pokemon.pixelmonName + " updated");
         }
