@@ -2,6 +2,7 @@ import {StreamZip} from "@drorgl/node-stream-zip";
 import {PokemonModel} from "./models/pokemon/pokemon";
 import fs from "fs";
 import fse from "fs-extra";
+import {IPokeEvolution} from "./models/pokemon/pokeevolution";
 
 function load(fileName: string){
     const zip = new StreamZip({
@@ -29,20 +30,56 @@ function load(fileName: string){
             let j = JSON.parse(data.toString().replace(": 00", ": 0"));
             j.id = entry.name.substr(entry.name.lastIndexOf("/") + 1).substr(0, 3);
             let poke = new PokemonModel(j);
-            for(let i = 0; i<poke.evolutions.length; i++){
+            for (let i = 0; i < poke.evolutions.length; i++) {
                 let to = j.evolutions[i].to;
-                if(typeof to === 'object'){
+                if (typeof to === 'object') {
                     poke.evolutions[i].name = to.name;
                     poke.evolutions[i].form = to.form;
-                }else{
+                } else {
                     poke.evolutions[i].name = to;
                     poke.evolutions[i].form = 0;
                 }
             }
-            poke.save().then(() => {
-                console.log(poke.pixelmonName + " saved");
-            });
+
+            await poke.save();
+            console.log(poke.pixelmonName + " saved");
         }
+
+        let pokemons = await PokemonModel.find({}).sort("id").exec();
+        console.log("loaded " + pokemons.length);
+        for (let pokemon of pokemons) {
+            let prev: IPokeEvolution[] = [];
+            let next: IPokeEvolution[] = [];
+            pokemon.preEvolutions.forEach((evo) => {
+                let findPrevEvoPokemon = pokemons.find((p) => p.pixelmonName == evo);
+                if (findPrevEvoPokemon == null) return;
+                if (findPrevEvoPokemon.evolutions.length > 0) {
+                    prev.push(Object.assign(findPrevEvoPokemon.evolutions[0], {
+                        from: evo
+                    }));
+                }
+            });
+            let foundNames: String[] = [];
+            pokemon.evolutions.forEach((evo) => {
+                if (foundNames.indexOf(evo.name) != -1) {
+                    return;
+                }
+                let find = pokemons.find((p) => p.pixelmonName == evo.name);
+                foundNames.push(evo.name);
+                if (find == null) return;
+                if (find.evolutions.length > 0) {
+                    next.push(Object.assign(find.evolutions[0], {
+                        from: evo.name
+                    }));
+                }
+            });
+            await PokemonModel.update({_id: pokemon._id}, {
+                prevEvolutions: prev,
+                nextEvolutions: next
+            });
+            console.log(pokemon.pixelmonName + " updated");
+        }
+
         await new Promise((resolve, reject) => {
             zip.extract('assets/pixelmon/textures/sprites/pokemon/', './storage/sprites', err => {
                 console.log(err ? 'Extract sprites error' : 'Sprites extracted');

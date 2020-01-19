@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {IPokeStats,PokeStatsSchema} from "./pokestats";
+import {IPokeStats, PokeStatsSchema} from "./pokestats";
 import {IPokeAggression, PokeAggressionScheme} from "./pokeaggression";
 import {IPokeEvolution, PokeEvolutionScheme} from "./pokeevolution";
 
@@ -29,6 +29,8 @@ interface IPokemon extends mongoose.Document {
     evYields: Map<String, Number>,
     weight: Number,
     evolutions: IPokeEvolution[],
+    nextEvolutions: IPokeEvolution[],
+    prevEvolutions: IPokeEvolution[],
     abilities: String[],
     eggGroups: String[],
     eggCycles: Number,
@@ -65,6 +67,8 @@ const PokemonScheme = new mongoose.Schema({
     evYields: Map,
     weight: Number,
     evolutions: [PokeEvolutionScheme],
+    nextEvolutions: [PokeEvolutionScheme],
+    prevEvolutions: [PokeEvolutionScheme],
     abilities: [String],
     eggGroups: [String],
     eggCycles: Number,
