@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {IPokeStats, PokeStatsSchema} from "./pokestats";
 import {IPokeAggression, PokeAggressionScheme} from "./pokeaggression";
 import {IPokeEvolution, PokeEvolutionScheme} from "./pokeevolution";
+import {IPokeMove, PokeMoveScheme} from "./pokemove";
 
 
 interface IPokemon extends mongoose.Document {
@@ -34,10 +35,10 @@ interface IPokemon extends mongoose.Document {
     abilities: String[],
     eggGroups: String[],
     eggCycles: Number,
-    levelUpMoves: Map<String, String[]>,
-    tmMoves: String[],
-    tutorMoves: String[],
-    eggMoves: String[],
+    levelUpMoves: Map<String, IPokeMove[]>,
+    tmMoves: IPokeMove[],
+    tutorMoves: IPokeMove[],
+    eggMoves: IPokeMove[],
     forms: Map<String, IPokemon>,
     form: Number
 }
@@ -73,9 +74,9 @@ const PokemonScheme = new mongoose.Schema({
     eggGroups: [String],
     eggCycles: Number,
     levelUpMoves: Map,
-    tmMoves: [String],
-    tutorMoves: [String],
-    eggMoves: [String],
+    tmMoves: [PokeMoveScheme],
+    tutorMoves: [PokeMoveScheme],
+    eggMoves: [PokeMoveScheme],
     forms: Map,
     form: Number
 });

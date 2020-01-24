@@ -3,13 +3,14 @@ import {PokemonModel} from "./models/pokemon/pokemon";
 import fs from "fs";
 import fse from "fs-extra";
 import {IPokeEvolution} from "./models/pokemon/pokeevolution";
+import {IPokeMove, PokeMoveModel} from "./models/pokemon/pokemove";
 
-function load(fileName: string){
+function load(fileName: string) {
     const zip = new StreamZip({
         file: fileName,
         storeEntries: true
     });
-    zip.on('error', (err : Error) => {
+    zip.on('error', (err: Error) => {
         console.log(err);
     });
     zip.on('ready', async () => {
@@ -20,7 +21,28 @@ function load(fileName: string){
         await PokemonModel.find((err, res) => {
             console.log(`Removing ${res.length} pokemons`);
         });
-        await PokemonModel.deleteMany({}, err => {});
+        await PokemonModel.deleteMany({}, err => {
+        });
+        type MovesMap = Record<string, IPokeMove>;
+        let moves: MovesMap = {};
+        for (const entry of Object.values(zip.entries())) {
+            if (entry.name.indexOf("assets/pixelmon/moves") != 0 || entry.isDirectory) {
+                continue;
+            }
+            const data = zip.entryDataSync(entry.name);
+            let j = JSON.parse(data.toString().replace(": 00", ": 0").replace(/(\d+):\s{/, "\"$1\":{"));
+            let idx: number = j.attackIndex;
+            let name: string = j.attackName;
+            let type: string = j.attackType;
+            let cat: string = j.attackCategory;
+            moves[name] = new PokeMoveModel({
+                attackIndex: idx,
+                attackName: name,
+                attackType: type,
+                attackCategory: cat
+            });
+            moves[name].save();
+        }
         for (const entry of Object.values(zip.entries())) {
             if (entry.name.indexOf("assets/pixelmon/stats") != 0 || entry.isDirectory) {
                 continue;
@@ -30,6 +52,15 @@ function load(fileName: string){
             let j = JSON.parse(data.toString().replace(": 00", ": 0"));
             j.id = entry.name.substr(entry.name.lastIndexOf("/") + 1).substr(0, 3);
             let poke = new PokemonModel(j);
+            poke.levelUpMoves.clear();
+            let lvlMoves: { [key: string]: string[] } = j.levelUpMoves;
+            for (let lvl of Object.keys(lvlMoves)) {
+                let m = lvlMoves[lvl];
+                poke.levelUpMoves.set(lvl, m.map((name: string) => moves[name]));
+            }
+            poke.eggMoves = j.eggMoves === undefined ? [] : j.eggMoves.map((name: string) => moves[name]);
+            poke.tmMoves = j.tmMoves === undefined ? [] : j.tmMoves.map((name: string) => moves[name]);
+            poke.tutorMoves = j.tutorMoves === undefined ? [] : j.tutorMoves.map((name: string) => moves[name]);
             for (let i = 0; i < poke.evolutions.length; i++) {
                 let to = j.evolutions[i].to;
                 if (typeof to === 'object') {
