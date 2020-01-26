@@ -16,14 +16,7 @@ function load(fileName: string) {
     });
     zip.on('ready', async () => {
         fse.removeSync('storage');
-        fs.mkdirSync('storage');
-        fs.mkdirSync('storage/sprites');
 
-        await PokemonModel.find((err, res) => {
-            console.log(`Removing ${res.length} pokemons`);
-        });
-        await PokemonModel.deleteMany({}, err => {
-        });
         loadMoves(zip);
         await loadPokemons(zip);
         await updateEvolutions();

@@ -4,6 +4,11 @@ import {getMove} from "./moves_load";
 import {IPokeEvolution} from "../models/pokemon/pokeevolution";
 
 const loadPokemons = async (zip: StreamZip) => {
+    await PokemonModel.find((err, res) => {
+        console.log(`Removing ${res.length} pokemons`);
+    });
+    await PokemonModel.deleteMany({}, err => {
+    });
     for (const entry of Object.values(zip.entries())) {
         if (entry.name.indexOf("assets/pixelmon/stats") != 0 || entry.isDirectory) {
             continue;
