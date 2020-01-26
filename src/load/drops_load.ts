@@ -2,7 +2,7 @@ import {StreamZip} from "@drorgl/node-stream-zip";
 import {DropItemModel, DropType, IDropItem} from "../models/drops/item";
 
 const loadDrops = async (zip: StreamZip) => {
-    await DropItemModel.find({}, (err, res) => console.log(`removing ${res.length} items`));
+    await DropItemModel.find({}, (err, res) => console.log(`Removed ${res.length} items`));
     await DropItemModel.deleteMany({});
 
 
@@ -78,7 +78,7 @@ const loadDrops = async (zip: StreamZip) => {
     for (const d of Object.values(drops)) {
         await d.save();
     }
-    await DropItemModel.find({}, (err, res) => console.log(`saved ${res.length} items`));
+    await DropItemModel.find({}, (err, res) => console.log(`Loaded ${res.length} items`));
 };
 
 export {

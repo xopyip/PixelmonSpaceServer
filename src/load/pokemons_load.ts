@@ -4,11 +4,8 @@ import {getMove} from "./moves_load";
 import {IPokeEvolution} from "../models/pokemon/pokeevolution";
 
 const loadPokemons = async (zip: StreamZip) => {
-    await PokemonModel.find((err, res) => {
-        console.log(`Removing ${res.length} pokemons`);
-    });
-    await PokemonModel.deleteMany({}, err => {
-    });
+    await PokemonModel.find((err, res) => console.log(`Removed ${res.length} pokemons`));
+    await PokemonModel.deleteMany({});
     for (const entry of Object.values(zip.entries())) {
         if (entry.name.indexOf("assets/pixelmon/stats") != 0 || entry.isDirectory) {
             continue;
@@ -43,8 +40,8 @@ const loadPokemons = async (zip: StreamZip) => {
         }
 
         await poke.save();
-        console.log(poke.pixelmonName + " saved");
     }
+    await PokemonModel.find((err, res) => console.log(`Loaded ${res.length} pokemons`));
 };
 
 const updateEvolutions = async () => {
@@ -93,8 +90,8 @@ const updateEvolutions = async () => {
             nextEvolutions: next,
             evolutions: evo
         });
-        console.log(pokemon.pixelmonName + " updated");
     }
+    await PokemonModel.find((err, res) => console.log(`Updated evolutions of ${res.length} pokemons`));
 };
 
 export {

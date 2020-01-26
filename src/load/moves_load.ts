@@ -3,7 +3,9 @@ import {StreamZip} from "@drorgl/node-stream-zip";
 
 type MovesMap = Record<string, IPokeMove>;
 let moves: MovesMap = {};
-const loadMoves = (zip: StreamZip) => {
+const loadMoves = async (zip: StreamZip) => {
+    await PokeMoveModel.find((err, res) => console.log(`Removed ${res.length} moves`));
+    await PokeMoveModel.deleteMany({});
     for (const entry of Object.values(zip.entries())) {
         if (entry.name.indexOf("assets/pixelmon/moves") != 0 || entry.isDirectory) {
             continue;
@@ -20,8 +22,9 @@ const loadMoves = (zip: StreamZip) => {
             attackType: type,
             attackCategory: cat
         });
-        moves[name].save();
+        await moves[name].save();
     }
+    await PokeMoveModel.find((err, res) => console.log(`Loaded ${res.length} moves`));
 };
 
 function getMove(name: string): IPokeMove {

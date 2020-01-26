@@ -16,7 +16,7 @@ function load(fileName: string) {
     zip.on('ready', async () => {
         fse.removeSync('storage');
 
-        loadMoves(zip);
+        await loadMoves(zip);
         await loadPokemons(zip);
         await updateEvolutions();
         await extractSprites(zip);
