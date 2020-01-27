@@ -13,16 +13,20 @@ interface PokemonDropSource {
 
 interface IDropItem extends mongoose.Document {
     item: String,
-    opponents: PokemonDropSource[]
-    chests: string[]
-    bosses: string[]
+    opponents: PokemonDropSource[],
+    chests: string[],
+    bosses: string[],
+    translations: string[],
+    texture: string,
 }
 
 const DropItemScheme = new mongoose.Schema({
     item: String,
     opponents: [Object],
     chests: [String],
-    bosses: [String]
+    bosses: [String],
+    translations: [String],
+    texture: String,
 });
 const DropItemModel = mongoose.model<IDropItem>('DropItem', DropItemScheme);
 
