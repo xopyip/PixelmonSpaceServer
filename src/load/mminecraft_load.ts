@@ -43,7 +43,14 @@ function downloadFile(url: string, path: string): Promise<null> {
 }
 
 function readTexture(zip: StreamZip, dir: string, path: string): string | undefined {
-
+    path = path.toLowerCase();
+    if (path.indexOf(":") !== -1) path = path.split(":")[1];
+    if (zip.entry(dir + path) === undefined) {
+        path = path.replace("item", "block")
+    }
+    if (zip.entry(dir + path) === undefined) {
+        return undefined;
+    }
     let model = JSON.parse(zip.entryDataSync(dir + path).toString());
     if (model.textures !== undefined) {
         return model.textures.layer0 || model.textures.texture || model.textures.front || model.textures.side || model.textures.all;
@@ -55,7 +62,7 @@ function readTexture(zip: StreamZip, dir: string, path: string): string | undefi
 }
 
 async function loadMinecraft(): Promise<null> {
-    fs.mkdirSync("./storage/items");
+    fs.mkdirSync("./storage/items", {recursive: true});
     let content = await getContent("https://launchermeta.mojang.com/mc/game/version_manifest.json");
     let versions: { id: string, type: string, url: string }[] = JSON.parse(content).versions;
     let versionURL = null;
@@ -86,7 +93,6 @@ async function loadMinecraft(): Promise<null> {
             console.log(err);
         });
         zip.on('ready', async () => {
-            await console.log(zip.entryDataSync("assets/minecraft/models/item/player_head.json").toString());
             let items = await DropItemModel.find({item: /minecraft(.*)/}).exec();
             for (let i = 0; i < items.length; i++) {
                 let item = items[i];
@@ -109,7 +115,8 @@ async function loadMinecraft(): Promise<null> {
                     continue
                 }
                 let itemTexture = `${texture}.png` || "";
-                itemTexture = itemTexture.substring(itemTexture.lastIndexOf("/"));
+                itemTexture = itemTexture.substring(itemTexture.lastIndexOf("/") + 1);
+                itemTexture = "minecraft_" + itemTexture;
 
                 await new Promise((resolve, reject) => {
                     zip.extractFile(zip.entry(`assets/minecraft/textures/${texture}.png`), `./storage/items/${itemTexture}.png`, err => {
@@ -127,5 +134,5 @@ async function loadMinecraft(): Promise<null> {
 }
 
 export {
-    loadMinecraft
+    loadMinecraft, readTexture
 }

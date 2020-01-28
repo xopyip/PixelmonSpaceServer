@@ -4,7 +4,7 @@ import {DropItemModel} from "../models/drops/item";
 class ItemsController {
     public static async list(req: Request, res: Response) {
         let find = DropItemModel.find({});
-        find.select("-_id item translations");
+        find.select("-_id item translations texture");
         res.json(await find.exec());
     }
 
